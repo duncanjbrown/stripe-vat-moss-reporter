@@ -31,6 +31,14 @@ class ClearbooksCsv
     true
   end
 
+  def fees
+    fees = 0
+    @stripe_data.data.map do |stripe_charge|
+      fees += stripe_charge.balance_transaction.fee
+    end
+    puts "Total fees: £#{fees.to_f / 100}"
+  end
+
   def generate_client_name(country)
     "Mr #{country}"
   end
@@ -42,19 +50,24 @@ class ClearbooksCsv
   def stripe_data_by_country
     output = {}
     @stripe_data.data.map do |charge|
-    	country = charge[:source][:country]
-    	vat_rate = @rates[country]
+      country = charge[:source][:country]
+      vat_rate = @rates[country]
 
-    	# Smush all non-US, non-EU countries into one row
-    	if vat_rate.nil? and country != "US"
-    		country = "ROW"
-    	end
+      # Smush all non-US, non-EU countries into one row
+      if vat_rate.nil? and country != "US"
+        country = "ROW"
+      end
 
-    	output[country] ||= {amount: 0, count: 0, vat_rate: 0}
-    	output[country][:amount] += charge[:amount]
-    	output[country][:count] += 1
-    	output[country][:vat_rate] = vat_rate || 0
+      begin
+        output[country] ||= {amount: 0, count: 0, vat_rate: 0}
+        output[country][:amount] += charge.balance_transaction[:amount]
+        output[country][:count] += 1
+        output[country][:vat_rate] = vat_rate || 0
+      rescue Exception => e
+        raise charge.inspect
+      end
     end
+
     output
   end
 

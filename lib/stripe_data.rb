@@ -13,20 +13,24 @@ class StripeData
   end
 
   def get_charges(starting_after = nil)
-  	charges = Stripe::Charge.all(
-  		created: {
-  			gte: @start_date.to_time.to_i,
-  			lte: @end_date.to_time.to_i
-  		},
-  		limit: 100,
-  		starting_after: starting_after
-  	)
+    print '.'
+    charges = Stripe::Charge.all(
+      created: {
+        gte: @start_date.to_time.to_i,
+        lte: @end_date.to_time.to_i
+      },
+      limit: 100,
+      starting_after: starting_after,
+      expand: ["data.balance_transaction"]
+    )
 
-  	if charges.has_more
-  		return charges.data.concat get_charges(charges.data.last.id)
-  	else
-  		return charges.data
-  	end
+    data = charges.select { |c| c.paid }
+
+    if charges.has_more
+      return data.concat get_charges(charges.data.last.id)
+    else
+      return data
+    end
   end
 
 end
