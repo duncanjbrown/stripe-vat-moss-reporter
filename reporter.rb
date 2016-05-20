@@ -5,15 +5,11 @@ require './lib/stripe_data'
 require './lib/clearbooks_csv'
 require './lib/clearbooks_clients'
 
-Stripe.api_key = "sk_test_cuWwUeGTSSkVqZNQFtkz96cW"
+Stripe.api_key = YAML.load('config/stripe.yml')[:key]
 
-#stripe_data = StripeData.new("04", "2016")
-#clearbooks_csv = ClearbooksCsv.new(stripe_data)
-clearbooks_clients = ClearbooksClients.new
+ClearbooksClients.new.generate
 
-clearbooks_clients.generate
-#clearbooks_csv.generate
+stripe_data = StripeData.new("04", "2016")
+clearbooks_csv = ClearbooksCsv.new(stripe_data).generate
 
-puts "Done!"
-
-# also get charge statement from all transfers over the course of this period
+puts "Processed #{stripe_data.data.count} transactions"

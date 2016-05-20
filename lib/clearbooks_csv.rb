@@ -20,8 +20,8 @@ class ClearbooksCsv
       clear_books_row << @stripe_data.end_date.strftime("%d-%m-%Y")
       clear_books_row << generate_client_name(country)
       clear_books_row << "Subscriptions for #{@stripe_data.start_date.strftime("%B %Y")}"
-      clear_books_row << data[:amount]
-      clear_books_row << data[:vat_rate]
+      clear_books_row << data[:amount].to_f / 100
+      clear_books_row << data[:vat_rate].to_f / 100
     end
     clear_books_csv.unshift clear_books_headers
     clear_books_csv
@@ -36,7 +36,7 @@ class ClearbooksCsv
   end
 
   def generate_invoice_number(country)
-    "Stripe-#{country}_#{@stripe_data.end_date.strftime("%d-%m-%Y")}"
+    "#{country}#{@stripe_data.end_date.strftime("%d%m%Y")}"
   end
 
   def stripe_data_by_country

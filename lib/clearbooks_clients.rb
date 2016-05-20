@@ -13,6 +13,8 @@ class ClearbooksClients
       @countries.map do |country|
         csv << [generate_client_name(country)]
       end
+      csv << ["Mr US"]
+      csv << ["Mr ROW"]
     end
   end
 
