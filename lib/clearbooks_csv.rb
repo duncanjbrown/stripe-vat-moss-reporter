@@ -20,7 +20,7 @@ class ClearbooksCsv
       clear_books_row << @stripe_data.end_date.strftime("%d-%m-%Y")
       clear_books_row << generate_client_name(country)
       clear_books_row << "Subscriptions for #{@stripe_data.start_date.strftime("%B %Y")}"
-      clear_books_row << data[:amount].to_f / 100
+      clear_books_row << get_amount_before_tax(data[:amount].to_f / 100, data[:vat_rate].to_f / 100)
       clear_books_row << data[:vat_rate].to_f / 100
     end
     clear_books_csv.unshift clear_books_headers
@@ -29,6 +29,10 @@ class ClearbooksCsv
       clear_books_csv.map { |row| csv << row }
     end
     true
+  end
+
+  def get_amount_before_tax(amount, tax_rate)
+    (amount / (1 + tax_rate)).round(2)
   end
 
   def fees
