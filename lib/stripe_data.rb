@@ -18,7 +18,7 @@ class StripeData
   			gte: @start_date.to_time.to_i,
   			lte: @end_date.to_time.to_i
   		},
-  		limit: 2,
+  		limit: 100,
   		starting_after: starting_after
   	)
 

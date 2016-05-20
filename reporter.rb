@@ -5,7 +5,7 @@ require './lib/stripe_data'
 require './lib/clearbooks_csv'
 require './lib/clearbooks_clients'
 
-Stripe.api_key = YAML.load('config/stripe.yml')[:key]
+Stripe.api_key = YAML.load_file('config/stripe.yml')["key"]
 
 ClearbooksClients.new.generate
 
