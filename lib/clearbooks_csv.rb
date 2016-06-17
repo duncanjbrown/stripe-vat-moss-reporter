@@ -9,19 +9,22 @@ class ClearbooksCsv
   end
 
   def clear_books_headers
-    ["Invoice Number", "Invoice Date", "Customer Name", "Line Description", "Line Net Price", "Line VAT Rate"]
+    ["Invoice Number", "Invoice Date", "Customer Name", "Line Description", "Line Unit Price", "Line VAT Amount", "Line VAT Rate", "Line Gross"]
   end
 
   def generate
     data = stripe_data_by_country
     clear_books_csv = data.map do |country, data|
+      cost_before_vat = get_amount_before_tax(data[:amount], data[:vat_rate])
       clear_books_row = []
       clear_books_row << generate_invoice_number(country)
       clear_books_row << @stripe_data.end_date.strftime("%d-%m-%Y")
       clear_books_row << generate_client_name(country)
       clear_books_row << "Purchases for #{@stripe_data.start_date.strftime("%B %Y")}"
-      clear_books_row << get_amount_before_tax(data[:amount].to_f / 100, data[:vat_rate].to_f / 100)
-      clear_books_row << data[:vat_rate].to_f / 100
+      clear_books_row << cost_before_vat
+      clear_books_row << ((data[:amount].to_f / 100) - cost_before_vat).round(2)
+      clear_books_row << (data[:vat_rate].to_f / 100).round(2)
+      clear_books_row << data[:amount].to_f / 100
     end
     clear_books_csv.unshift clear_books_headers
     clear_books_csv
@@ -32,7 +35,9 @@ class ClearbooksCsv
   end
 
   def get_amount_before_tax(amount, tax_rate)
-    (amount / (1 + tax_rate)).round(2)
+    ((amount.to_f / 100) / 
+      (1 + ( tax_rate.to_f / 100 )
+    )).round(2)
   end
 
   def fees
@@ -46,7 +51,7 @@ class ClearbooksCsv
   def total 
     total = 0
     @stripe_data.data.map do |stripe_charge|
-      total += stripe_charge.amount.to_f
+      total += stripe_charge.balance_transaction[:amount]
     end 
     total 
   end
