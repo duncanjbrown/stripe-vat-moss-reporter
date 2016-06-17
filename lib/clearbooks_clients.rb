@@ -9,12 +9,12 @@ class ClearbooksClients
 
   def generate
     CSV.open("output/clients.csv", "wb") do |csv|
-      csv << ["Customer"]
+      csv << ["Customer", "Country"]
       @countries.map do |country|
-        csv << [generate_client_name(country)]
+        csv << [generate_client_name(country), country]
       end
-      csv << ["Mr US"]
-      csv << ["Mr ROW"]
+      csv << ["Mr US", "US"]
+      csv << ["Mr ROW", nil]
     end
   end
 

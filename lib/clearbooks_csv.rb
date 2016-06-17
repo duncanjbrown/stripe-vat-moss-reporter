@@ -19,7 +19,7 @@ class ClearbooksCsv
       clear_books_row << generate_invoice_number(country)
       clear_books_row << @stripe_data.end_date.strftime("%d-%m-%Y")
       clear_books_row << generate_client_name(country)
-      clear_books_row << "Subscriptions for #{@stripe_data.start_date.strftime("%B %Y")}"
+      clear_books_row << "Purchases for #{@stripe_data.start_date.strftime("%B %Y")}"
       clear_books_row << get_amount_before_tax(data[:amount].to_f / 100, data[:vat_rate].to_f / 100)
       clear_books_row << data[:vat_rate].to_f / 100
     end
@@ -40,7 +40,15 @@ class ClearbooksCsv
     @stripe_data.data.map do |stripe_charge|
       fees += stripe_charge.balance_transaction.fee
     end
-    puts "Total fees: £#{fees.to_f / 100}"
+    fees
+  end
+
+  def total 
+    total = 0
+    @stripe_data.data.map do |stripe_charge|
+      total += stripe_charge.amount.to_f
+    end 
+    total 
   end
 
   def generate_client_name(country)
