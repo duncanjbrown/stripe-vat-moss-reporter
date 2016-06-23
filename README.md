@@ -66,5 +66,6 @@ A few things to note:
 You will need to create each of these customers in the ClearBooks admin. The program provides a ready-made CSV to import them.
 You can find it at `output/customers.csv`.
 
-Once the customers are created you can simply import the generated `stripe-invoices-{date}` file using the transactions
-importer.
+Having imported these into ClearBooks, you need to manually visit each country/customer's page to pick "Digital Services to EU Customer" as the default VAT treatment and set the Country field for their default Invoice Address.
+
+Once the customers are created you can simply import the generated `stripe-invoices-{date}` file using the ClearBooks transactions importer.
