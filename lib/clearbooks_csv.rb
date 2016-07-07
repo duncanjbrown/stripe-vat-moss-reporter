@@ -20,7 +20,7 @@ class ClearbooksCsv
       clear_books_row << generate_invoice_number(country)
       clear_books_row << @stripe_data.end_date.strftime("%d-%m-%Y")
       clear_books_row << generate_client_name(country)
-      clear_books_row << "Purchases for #{@stripe_data.start_date.strftime("%B %Y")}"
+      clear_books_row << "Sales for #{@stripe_data.start_date.strftime("%B %Y")}"
       clear_books_row << cost_before_vat
       clear_books_row << ((data[:amount].to_f / 100) - cost_before_vat).round(2)
       clear_books_row << (data[:vat_rate].to_f / 100).round(2)
