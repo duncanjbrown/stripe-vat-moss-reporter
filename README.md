@@ -17,6 +17,8 @@ cp config/stripe.example.yml config/stripe.yml
 
 Add your Stripe _secret_ key (eg `sk_live_123456`) to the file `config/stripe.yml`.
 
+To fetch the latest VAT rates, run `rake fetch_vat_rates`. This uses the (great, free) https://euvatrates.com/ webservice.
+
 ## Usage 
 
 To generate a report for a given month, pass the month number and year as arguments to the script.
@@ -59,7 +61,7 @@ A few things to note:
 - Each country is assigned a customer name, which is Mr {COUNTRY_CODE}. In non-US or EU countries this name is "Mr ROW".
 - The date of the invoices is the end of the specified month.
 - Each invoice is assigned a number which is the concatenated country code and date.
-- The rates are kept in `data/rates.yml`.
+- The rates are kept in `data/rates.yml`, and are updated via `rake fetch_vat_rates`.
 
 ## Uploading to Clearbooks
 
