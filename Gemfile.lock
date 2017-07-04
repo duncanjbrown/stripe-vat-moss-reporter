@@ -1,0 +1,17 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    faraday (0.12.1)
+      multipart-post (>= 1.2, < 3)
+    multipart-post (2.0.0)
+    stripe (3.0.0)
+      faraday (~> 0.9)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  stripe
+
+BUNDLED WITH
+   1.15.1
