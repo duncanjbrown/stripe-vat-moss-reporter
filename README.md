@@ -26,7 +26,7 @@ To generate a report for a given month, pass the month number and year as argume
 For example, to report the transactions for May 2016, issue
 
 ```
-./report.rb 05 2016
+./reporter.rb 05 2016
 ```
 
 You'll see a progress indicator showing the data being downloaded from Stripe, with some summary figures at the end.
