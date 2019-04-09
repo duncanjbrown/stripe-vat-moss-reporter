@@ -1,11 +1,15 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    faraday (0.12.1)
+    connection_pool (2.2.2)
+    faraday (0.15.4)
       multipart-post (>= 1.2, < 3)
     multipart-post (2.0.0)
-    stripe (3.0.0)
-      faraday (~> 0.9)
+    net-http-persistent (3.0.0)
+      connection_pool (~> 2.2)
+    stripe (4.12.0)
+      faraday (~> 0.13)
+      net-http-persistent (~> 3.0)
 
 PLATFORMS
   ruby
@@ -14,4 +18,4 @@ DEPENDENCIES
   stripe
 
 BUNDLED WITH
-   1.15.1
+   1.16.5
