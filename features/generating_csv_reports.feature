@@ -50,3 +50,25 @@ Feature: Generating CSV reports
       Gross amount processed: 49.00 USD, 23.00 GBP
       Total fees paid: 6.38 USD, 5.00 GBP
       """
+
+  Scenario: There are fees from different sources
+    Given the following charge exists in Stripe
+      | amount | fee | currency | country |
+      | 4900   | 500 | usd      | FR      |
+    And the fees for the charge are
+      | amount | description               | currency |
+      | 250    | Stripe processing fees    | usd      |
+      | 250    | Some other processing fee | eur      |
+    When I run the CSV export for the period
+    Then a CSV file should be created with the contents
+      | Invoice Number  | Invoice Date | Customer Name | Line Description       | Line Unit Price | Line VAT Amount | Line VAT Rate | Line Gross | Currency |
+      | FR-USD-31012019 | 31-01-2019   | Mr FR         | Sales for January 2019 | 40.83           | 8.17            | 0.2           | 49.0       | USD      |
+    And the summary report should read
+      """
+      Gross amount processed: 49.00 USD
+      Total fees paid: 5.00 USD
+
+      Fee breakdown:
+      Stripe processing fees: 2.50 USD
+      Some other processing fee: 2.50 EUR
+      """
