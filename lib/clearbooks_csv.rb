@@ -36,13 +36,15 @@ class ClearbooksCsv
     end
     clear_books_csv.unshift clear_books_headers
 
-    filename = 'output/stripe-invoices-' \
-      "#{@stripe_data.end_date.strftime('%d-%m-%Y')}.csv"
-
     CSV.open(filename, 'wb') do |csv|
       clear_books_csv.map { |row| csv << row }
     end
     true
+  end
+
+  def filename
+    'output/stripe-invoices-' \
+      "#{@stripe_data.end_date.strftime('%d-%m-%Y')}.csv"
   end
 
   def get_amount_before_tax(amount, tax_rate)
@@ -84,14 +86,10 @@ class ClearbooksCsv
       # Smush all non-US, non-EU countries into one row
       country = 'ROW' if vat_rate.nil? && (country != 'US')
 
-      begin
-        output[country] ||= { amount: 0, count: 0, vat_rate: 0 }
-        output[country][:amount] += charge.balance_transaction[:amount]
-        output[country][:count] += 1
-        output[country][:vat_rate] = vat_rate || 0
-      rescue StandardError
-        raise charge.inspect
-      end
+      output[country] ||= { amount: 0, count: 0, vat_rate: 0 }
+      output[country][:amount] += charge[:balance_transaction][:amount].to_i
+      output[country][:count] += 1
+      output[country][:vat_rate] = vat_rate || 0
     end
 
     output
