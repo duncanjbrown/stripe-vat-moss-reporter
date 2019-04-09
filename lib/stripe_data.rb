@@ -1,13 +1,12 @@
 require 'stripe'
 
 class StripeData
-
   attr_accessor :data
   attr_accessor :start_date
   attr_accessor :end_date
 
   def initialize(month, year)
-    @start_date = DateTime.strptime("#{month}-#{year}", "%m-%Y")
+    @start_date = DateTime.strptime("#{month}-#{year}", '%m-%Y')
     @end_date = @start_date.end_of_month
     @data = get_charges
   end
@@ -21,10 +20,10 @@ class StripeData
       },
       limit: 100,
       starting_after: starting_after,
-      expand: ["data.balance_transaction"]
+      expand: ['data.balance_transaction']
     )
 
-    data = charges.select { |c| c.paid }
+    data = charges.select(&:paid)
 
     if charges.has_more
       return data.concat get_charges(charges.data.last.id)
@@ -32,5 +31,4 @@ class StripeData
       return data
     end
   end
-
 end

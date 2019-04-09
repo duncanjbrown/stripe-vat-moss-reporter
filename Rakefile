@@ -7,8 +7,8 @@ task :fetch_vat_rates do
 
   json = open("http://www.apilayer.net/api/rate_list?access_key=#{vatlayer_key}").read
   rates = JSON.parse(json)
-  tuples = rates["rates"].map do |(country, values)|
-    [country, values["standard_rate"]] 
+  tuples = rates['rates'].map do |(country, values)|
+    [country, values['standard_rate']]
   end
 
   File.open('data/rates.yml', 'w') do |f|

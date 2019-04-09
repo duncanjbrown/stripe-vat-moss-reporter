@@ -8,12 +8,12 @@ require './lib/clearbooks_clients'
 month = ARGV[0].to_s || Time.now.month
 year = ARGV[1].to_s || Time.now.year
 
-Stripe.api_key = YAML.load_file('config/stripe.yml')["key"]
+Stripe.api_key = YAML.load_file('config/stripe.yml')['key']
 
 ClearbooksClients.new.generate
 
 puts "\n"
-puts "Fetching charge data from Stripe"
+puts 'Fetching charge data from Stripe'
 
 stripe_data = StripeData.new(month, year)
 clearbooks_csv = ClearbooksCsv.new(stripe_data)
