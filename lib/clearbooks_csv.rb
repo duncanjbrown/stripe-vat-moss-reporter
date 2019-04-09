@@ -16,16 +16,19 @@ class ClearbooksCsv
       'Line Unit Price',
       'Line VAT Amount',
       'Line VAT Rate',
-      'Line Gross'
+      'Line Gross',
+      'Currency'
     ]
   end
 
   def generate
-    country_data = stripe_data_by_country
+    country_data = stripe_data_by_country_and_currency
     clear_books_csv = country_data.map do |country, data|
+      country, currency = country.split('_')
+
       cost_before_vat = get_amount_before_tax(data[:amount], data[:vat_rate])
       row = []
-      row << generate_invoice_number(country)
+      row << generate_invoice_number(country, currency)
       row << @stripe_data.end_date.strftime('%d-%m-%Y')
       row << generate_client_name(country)
       row << "Sales for #{@stripe_data.start_date.strftime('%B %Y')}"
@@ -33,6 +36,7 @@ class ClearbooksCsv
       row << ((data[:amount].to_f / 100) - cost_before_vat).round(2)
       row << (data[:vat_rate].to_f / 100).round(2)
       row << data[:amount].to_f / 100
+      row << currency.upcase
     end
     clear_books_csv.unshift clear_books_headers
 
@@ -73,11 +77,11 @@ class ClearbooksCsv
     "Mr #{country}"
   end
 
-  def generate_invoice_number(country)
-    "#{country}#{@stripe_data.end_date.strftime('%d%m%Y')}"
+  def generate_invoice_number(country, currency)
+    "#{country}-#{currency.upcase}-#{@stripe_data.end_date.strftime('%d%m%Y')}"
   end
 
-  def stripe_data_by_country
+  def stripe_data_by_country_and_currency
     output = {}
     @stripe_data.data.map do |charge|
       country = charge[:source][:country]
@@ -85,11 +89,12 @@ class ClearbooksCsv
 
       # Smush all non-US, non-EU countries into one row
       country = 'ROW' if vat_rate.nil? && (country != 'US')
+      country_key = "#{country}_#{charge[:balance_transaction][:currency]}"
 
-      output[country] ||= { amount: 0, count: 0, vat_rate: 0 }
-      output[country][:amount] += charge[:balance_transaction][:amount].to_i
-      output[country][:count] += 1
-      output[country][:vat_rate] = vat_rate || 0
+      output[country_key] ||= { amount: 0, count: 0, vat_rate: 0 }
+      output[country_key][:amount] += charge[:balance_transaction][:amount].to_i
+      output[country_key][:count] += 1
+      output[country_key][:vat_rate] = vat_rate || 0
     end
 
     output
