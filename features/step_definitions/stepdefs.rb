@@ -5,8 +5,9 @@ module CSVGenerationHelper
     @stripe_charges = Struct.new(:data, :start_date, :end_date).new(
       hashes.map do |h|
         {
-          "balance_transaction": { "amount": h[:amount], "fee": h[:fee] },
-          "currency": h[:currency],
+          "balance_transaction": {
+            "amount": h[:amount], "fee": h[:fee], "currency": h[:currency]
+          },
           "source": { "country": h[:country] }
         }
       end, Date.new(2019, 1, 1), Date.new(2019, 1, 31)
