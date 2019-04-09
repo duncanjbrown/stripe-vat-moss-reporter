@@ -8,6 +8,11 @@ Feature: Generating CSV reports
     Then a CSV file should be created with the contents
       | Invoice Number  | Invoice Date | Customer Name | Line Description       | Line Unit Price | Line VAT Amount | Line VAT Rate | Line Gross | Currency |
       | FR-USD-31012019 | 31-01-2019   | Mr FR         | Sales for January 2019 | 40.83           | 8.17            | 0.2           | 49.0       | USD      |
+    And the summary report should read
+      """
+      Gross amount processed: 49.00 USD
+      Total fees paid: 6.38 USD
+      """
 
   Scenario: Two charges from one country
     Given there are the following charges in Stripe
