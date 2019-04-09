@@ -19,11 +19,4 @@ stripe_data = StripeData.new(month, year)
 clearbooks_csv = ClearbooksCsv.new(stripe_data)
 
 clearbooks_csv.generate
-fees = clearbooks_csv.fees
-total = clearbooks_csv.total
-
-puts "\n\n"
-puts "Gross amount processed: £#{total.to_f / 100}"
-puts "Total fees paid to Stripe: £#{fees.to_f / 100}"
-puts "Processed #{stripe_data.data.count} transactions"
-puts "\n"
+puts clearbooks_csv.summary

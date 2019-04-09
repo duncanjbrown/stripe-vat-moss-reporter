@@ -47,8 +47,14 @@ class ClearbooksCsv
   end
 
   def summary
-    "Gross amount processed: #{totals_by_currency}\n" \
+    basic = "Gross amount processed: #{totals_by_currency}\n" \
     "Total fees paid: #{fees_by_currency}"
+
+    if fees_by_source
+      basic + "\n\nFee breakdown:\n#{fees_by_source}"
+    else
+      basic
+    end
   end
 
   def filename
@@ -60,6 +66,32 @@ class ClearbooksCsv
     ((amount.to_f / 100) /
       (1 + (tax_rate.to_f / 100)
       )).round(2)
+  end
+
+  def fees_by_source
+    fee_types = {}
+    fee_currencies = {}
+
+    @stripe_data.data.map do |stripe_charge|
+      details = stripe_charge[:balance_transaction][:fee_details] || []
+      details.each do |fee|
+        fee_identifier = fee[:description]
+
+        fee_currencies[fee_identifier] ||= fee[:currency]
+        fee_types[fee_identifier] ||= 0
+        fee_types[fee_identifier] += fee[:amount].to_i
+      end
+    end
+
+    if fee_types.none?
+      nil
+    else
+      fee_types.keys.map do |fee_identifier|
+        "#{fee_identifier}: " \
+        "#{format('%.2f', fee_types[fee_identifier].to_f / 100)}\ "\
+          "#{fee_currencies[fee_identifier].upcase}"
+      end.join("\n")
+    end
   end
 
   def fees_by_currency
@@ -88,7 +120,7 @@ class ClearbooksCsv
 
   def currency_kvs_to_string_summary(currency_to_amount_pairs)
     currency_to_amount_pairs.keys.map do |currency|
-      "#{sprintf('%.2f', currency_to_amount_pairs[currency].to_f / 100)}\ "\
+      "#{format('%.2f', currency_to_amount_pairs[currency].to_f / 100)}\ "\
       "#{currency.upcase}"
     end.join(', ')
   end

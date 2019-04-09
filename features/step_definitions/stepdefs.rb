@@ -48,3 +48,13 @@ Then('the summary report should read') do |summary|
   expect(@export.summary).to eq(summary)
 end
 
+Given('the following charge exists in Stripe') do |table|
+  add_stripe_charge(table.hashes.first)
+end
+
+Given("the fees for the charge are") do |table|
+  update_last_stripe_charge do |charge|
+    charge[:balance_transaction][:fee_details] = table.hashes
+    charge
+  end
+end
