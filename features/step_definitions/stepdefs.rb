@@ -22,7 +22,8 @@ Given('there are the following charges in Stripe') do |table|
 end
 
 When('I run the CSV export for the period') do
-  ClearbooksCsv.new(@stripe_charges).generate
+  @export = ClearbooksCsv.new(@stripe_charges)
+  @export.generate
 end
 
 Then('a CSV file should be created with the contents') do |table|
@@ -31,3 +32,8 @@ Then('a CSV file should be created with the contents') do |table|
 
   expect(table.hashes).to match(csv_contents)
 end
+
+Then('the summary report should read') do |summary|
+  expect(@export.summary).to eq(summary)
+end
+

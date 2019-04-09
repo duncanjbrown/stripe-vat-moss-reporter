@@ -46,6 +46,11 @@ class ClearbooksCsv
     true
   end
 
+  def summary
+    "Gross amount processed: #{totals_by_currency}\n" \
+    "Total fees paid: #{fees_by_currency}"
+  end
+
   def filename
     'output/stripe-invoices-' \
       "#{@stripe_data.end_date.strftime('%d-%m-%Y')}.csv"
@@ -57,20 +62,35 @@ class ClearbooksCsv
       )).round(2)
   end
 
-  def fees
-    fees = 0
+  def fees_by_currency
+    fees = {}
+
     @stripe_data.data.map do |stripe_charge|
-      fees += stripe_charge.balance_transaction.fee
+      currency = stripe_charge[:balance_transaction][:currency]
+      fees[currency] ||= 0
+      fees[currency] += stripe_charge[:balance_transaction][:fee].to_i
     end
-    fees
+
+    currency_kvs_to_string_summary(fees)
   end
 
-  def total
-    total = 0
+  def totals_by_currency
+    totals = {}
+
     @stripe_data.data.map do |stripe_charge|
-      total += stripe_charge.balance_transaction[:amount]
+      currency = stripe_charge[:balance_transaction][:currency]
+      totals[currency] ||= 0
+      totals[currency] += stripe_charge[:balance_transaction][:amount].to_i
     end
-    total
+
+    currency_kvs_to_string_summary(totals)
+  end
+
+  def currency_kvs_to_string_summary(currency_to_amount_pairs)
+    currency_to_amount_pairs.keys.map do |currency|
+      "#{sprintf('%.2f', currency_to_amount_pairs[currency].to_f / 100)}\ "\
+      "#{currency.upcase}"
+    end.join(', ')
   end
 
   def generate_client_name(country)
