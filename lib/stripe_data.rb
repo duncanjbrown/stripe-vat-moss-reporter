@@ -26,9 +26,9 @@ class StripeData
     data = charges.select(&:paid)
 
     if charges.has_more
-      return data.concat get_charges(charges.data.last.id)
+      data.concat get_charges(charges.data.last.id)
     else
-      return data
+      data
     end
   end
 end

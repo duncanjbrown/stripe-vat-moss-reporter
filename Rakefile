@@ -5,7 +5,9 @@ task :fetch_vat_rates do
 
   vatlayer_key = ENV.fetch('VATLAYER_ACCESS_KEY')
 
-  json = open("http://www.apilayer.net/api/rate_list?access_key=#{vatlayer_key}").read
+  json = open(
+    "http://www.apilayer.net/api/rate_list?access_key=#{vatlayer_key}"
+  ).read
   rates = JSON.parse(json)
   tuples = rates['rates'].map do |(country, values)|
     [country, values['standard_rate']]

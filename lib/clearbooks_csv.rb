@@ -8,26 +8,38 @@ class ClearbooksCsv
   end
 
   def clear_books_headers
-    ['Invoice Number', 'Invoice Date', 'Customer Name', 'Line Description', 'Line Unit Price', 'Line VAT Amount', 'Line VAT Rate', 'Line Gross']
+    [
+      'Invoice Number',
+      'Invoice Date',
+      'Customer Name',
+      'Line Description',
+      'Line Unit Price',
+      'Line VAT Amount',
+      'Line VAT Rate',
+      'Line Gross'
+    ]
   end
 
   def generate
-    data = stripe_data_by_country
-    clear_books_csv = data.map do |country, data|
+    country_data = stripe_data_by_country
+    clear_books_csv = country_data.map do |country, data|
       cost_before_vat = get_amount_before_tax(data[:amount], data[:vat_rate])
-      clear_books_row = []
-      clear_books_row << generate_invoice_number(country)
-      clear_books_row << @stripe_data.end_date.strftime('%d-%m-%Y')
-      clear_books_row << generate_client_name(country)
-      clear_books_row << "Sales for #{@stripe_data.start_date.strftime('%B %Y')}"
-      clear_books_row << cost_before_vat
-      clear_books_row << ((data[:amount].to_f / 100) - cost_before_vat).round(2)
-      clear_books_row << (data[:vat_rate].to_f / 100).round(2)
-      clear_books_row << data[:amount].to_f / 100
+      row = []
+      row << generate_invoice_number(country)
+      row << @stripe_data.end_date.strftime('%d-%m-%Y')
+      row << generate_client_name(country)
+      row << "Sales for #{@stripe_data.start_date.strftime('%B %Y')}"
+      row << cost_before_vat
+      row << ((data[:amount].to_f / 100) - cost_before_vat).round(2)
+      row << (data[:vat_rate].to_f / 100).round(2)
+      row << data[:amount].to_f / 100
     end
     clear_books_csv.unshift clear_books_headers
-    clear_books_csv
-    CSV.open("output/stripe-invoices-#{@stripe_data.end_date.strftime('%d-%m-%Y')}.csv", 'wb') do |csv|
+
+    filename = 'output/stripe-invoices-' \
+      "#{@stripe_data.end_date.strftime('%d-%m-%Y')}.csv"
+
+    CSV.open(filename, 'wb') do |csv|
       clear_books_csv.map { |row| csv << row }
     end
     true
@@ -77,7 +89,7 @@ class ClearbooksCsv
         output[country][:amount] += charge.balance_transaction[:amount]
         output[country][:count] += 1
         output[country][:vat_rate] = vat_rate || 0
-      rescue Exception => e
+      rescue StandardError
         raise charge.inspect
       end
     end
