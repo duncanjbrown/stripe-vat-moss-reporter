@@ -63,6 +63,14 @@ A few things to note:
 - Each invoice is assigned a number which is the concatenated country code and date.
 - The rates are kept in `data/rates.yml`, and are updated via `rake fetch_vat_rates`.
 
+## Testing
+
+We use `cucumber` to check that input maps correctly to CSV output. To run the suite just run:
+
+```
+cucumber
+```
+
 ## Uploading to Clearbooks
 
 You will need to create each of these customers in the ClearBooks admin. The program provides a ready-made CSV to import them.
