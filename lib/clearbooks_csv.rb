@@ -138,7 +138,7 @@ class ClearbooksCsv
     output = {}
     @stripe_data.data.map do |charge|
       charge = StripeCharge.new(charge)
-      country =  charge.country || 'US'
+      country =  charge.country
       vat_rate = @rates[country]
 
       # Smush all non-US, non-EU countries into one row

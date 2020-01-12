@@ -4,19 +4,23 @@ class StripeCharge
   end
 
   def country
-    charge.dig(:source, :country)
+    if charge[:source]
+      charge[:source][:country]
+    else
+      charge[:payment_method_details][:card][:country]
+    end
   end
 
   def currency
-    charge.dig(:balance_transaction, :currency)
+    charge[:balance_transaction][:currency]
   end
 
   def amount
-    charge.dig(:balance_transaction, :amount).to_i
+    charge[:balance_transaction][:amount].to_i
   end
 
   def fee
-    charge.dig(:balance_transaction, :fee).to_i
+    charge[:balance_transaction][:fee].to_i
   end
 
 private
