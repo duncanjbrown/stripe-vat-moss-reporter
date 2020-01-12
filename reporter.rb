@@ -1,9 +1,13 @@
 #!/usr/bin/env ruby
 
 require 'active_support/all'
-require './lib/stripe_data'
-require './lib/clearbooks_csv'
-require './lib/clearbooks_clients'
+
+$LOAD_PATH.unshift File.expand_path(".", "lib")
+
+require 'stripe_data'
+require 'clearbooks_csv'
+require 'clearbooks_clients'
+require 'stripe_charge'
 
 month = ARGV[0].to_s || Time.now.month
 year = ARGV[1].to_s || Time.now.year
