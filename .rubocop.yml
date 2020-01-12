@@ -6,9 +6,6 @@ Metrics/LineLength:
   Exclude:
     - 'spec/*'
 
-Metrics/AbcSize:
-  Enabled: false
-
 Metrics/MethodLength:
   Enabled: false
 

@@ -1,5 +1,6 @@
 require 'csv'
 require 'yaml'
+require 'stripe_charge'
 
 class ClearbooksCsv
   def initialize(stripe_data)
@@ -73,8 +74,8 @@ class ClearbooksCsv
     fee_currencies = {}
 
     @stripe_data.data.map do |stripe_charge|
-      details = stripe_charge[:balance_transaction][:fee_details] || []
-      details.each do |fee|
+      details = stripe_charge[:balance_transaction][:fee_details]
+      details&.each do |fee|
         fee_identifier = fee[:description]
 
         fee_currencies[fee_identifier] ||= fee[:currency]
@@ -83,9 +84,7 @@ class ClearbooksCsv
       end
     end
 
-    if fee_types.none?
-      nil
-    else
+    if fee_types.any?
       fee_types.keys.map do |fee_identifier|
         "#{fee_identifier}: " \
         "#{format('%.2f', fee_types[fee_identifier].to_f / 100)}\ "\
@@ -98,9 +97,10 @@ class ClearbooksCsv
     fees = {}
 
     @stripe_data.data.map do |stripe_charge|
-      currency = stripe_charge[:balance_transaction][:currency]
+      charge = StripeCharge.new(stripe_charge)
+      currency = charge.currency
       fees[currency] ||= 0
-      fees[currency] += stripe_charge[:balance_transaction][:fee].to_i
+      fees[currency] += charge.fee
     end
 
     currency_kvs_to_string_summary(fees)
@@ -110,9 +110,10 @@ class ClearbooksCsv
     totals = {}
 
     @stripe_data.data.map do |stripe_charge|
-      currency = stripe_charge[:balance_transaction][:currency]
+      charge = StripeCharge.new(stripe_charge)
+      currency = charge.currency
       totals[currency] ||= 0
-      totals[currency] += stripe_charge[:balance_transaction][:amount].to_i
+      totals[currency] += charge.amount
     end
 
     currency_kvs_to_string_summary(totals)
@@ -136,15 +137,16 @@ class ClearbooksCsv
   def stripe_data_by_country_and_currency
     output = {}
     @stripe_data.data.map do |charge|
-      country = charge[:source][:country]
+      charge = StripeCharge.new(charge)
+      country =  charge.country || 'US'
       vat_rate = @rates[country]
 
       # Smush all non-US, non-EU countries into one row
       country = 'ROW' if vat_rate.nil? && (country != 'US')
-      country_key = "#{country}_#{charge[:balance_transaction][:currency]}"
+      country_key = "#{country}_#{charge.currency}"
 
       output[country_key] ||= { amount: 0, count: 0, vat_rate: 0 }
-      output[country_key][:amount] += charge[:balance_transaction][:amount].to_i
+      output[country_key][:amount] += charge.amount
       output[country_key][:count] += 1
       output[country_key][:vat_rate] = vat_rate || 0
     end
